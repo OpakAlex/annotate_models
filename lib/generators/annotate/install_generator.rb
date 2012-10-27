@@ -7,6 +7,7 @@ module Annotate
       # copy rake tasks
       def copy_tasks
         template "auto_annotate_models.rake", "lib/tasks/auto_annotate_models.rake"
+        template "migrate.rake", "lib/tasks/migrate.rake"
       end
 
     end
