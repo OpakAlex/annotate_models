@@ -330,6 +330,8 @@ module AnnotateModels
     # Otherwise we take all the model files in the
     # model_dir directory.
     def get_model_files(options)
+      require_all_models() #fix if not require models
+
       if(!options[:is_rake])
         models = ARGV.dup
         models.shift
@@ -360,7 +362,6 @@ module AnnotateModels
     # Check for namespaced models in subdirectories as well as models
     # in subdirectories without namespacing.
     def get_model_class(file)
-      Dir.foreach("#{Rails.root}/app/models") { |f| require f if f =~ /.*\.rb/ }
       # this is for non-rails projects, which don't get Rails auto-require magic
       require File.expand_path("#{model_dir}/#{file}") unless Module.const_defined?(:Rails)
       model_path = file.gsub(/\.rb$/, '')
@@ -465,6 +466,23 @@ module AnnotateModels
       return filename_template.
           gsub('%MODEL_NAME%', model_name).
           gsub('%TABLE_NAME%', table_name || model_name.pluralize)
+    end
+
+    def require_all_models
+      return unless Module.const_defined?(:Rails)
+      block = proc do |path|
+        tmp_path = Rails.root.join('app', 'models', path)
+        Dir.foreach(tmp_path) do |f|
+          if f =~ /.*\.rb/
+            require f
+          else
+            unless f.include?(".")
+              block.call(f)
+            end
+          end
+        end
+      end
+      block.call("")
     end
   end
 end
