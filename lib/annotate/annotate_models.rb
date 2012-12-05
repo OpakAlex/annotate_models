@@ -472,7 +472,7 @@ module AnnotateModels
       return unless Module.const_defined?(:Rails)
       path = Rails.root.join('app', 'models', '**', '*.rb')
       Dir.glob(path).each do |model|
-        model_name = (model.match /(?<name>\w+)/)[:name].camelcase
+        model_name = (model.split('/').last.match /(?<name>\w+)/)[:name].camelcase
         require model unless Module.const_defined?(model_name.to_sym)
       end
     end
