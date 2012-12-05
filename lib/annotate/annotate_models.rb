@@ -470,19 +470,11 @@ module AnnotateModels
 
     def require_all_models
       return unless Module.const_defined?(:Rails)
-      block = proc do |path|
-        tmp_path = Rails.root.join('app', 'models', path)
-        Dir.foreach(tmp_path) do |f|
-          if f =~ /.*\.rb/
-            require f
-          else
-            unless f.include?(".")
-              block.call(f)
-            end
-          end
-        end
+      path = Rails.root.join('app', 'models', '**', '*.rb')
+      Dir.glob(path).each do |model|
+        model_name = (model.match /(?<name>\w+)/)[:name].camelcase
+        require model unless Module.const_defined?(model_name.to_sym)
       end
-      block.call("")
     end
   end
 end
